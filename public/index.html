@@ -321,7 +321,7 @@ async function login() {
 
   userSession = data.session;
   lockEl.classList.add('hidden');
-  setTimeout(() => { lockEl.style.display = 'none'; appEl.classList.add('visible'); startBot(); }, 700);
+  setTimeout(() => { lockEl.style.display = 'none'; appEl.classList.add('visible'); loadHistory(); }, 700);
 }
 unlockBtn.addEventListener('click', login);
 emailInput.addEventListener('keydown', e => { if (e.key === 'Enter') passwordInput.focus(); });
@@ -545,6 +545,7 @@ async function callAPI(userMsg) {
     const summary = extractSummary(raw);
     const display = cleanText(raw);
     history.push({ role: 'model', parts: [{ text: raw }] });
+    saveHistory();
     addBubble(mdToHtml(display), 'bot');
     if (summary) {
       setProgress(TOTAL_STEPS);
@@ -567,6 +568,59 @@ async function callAPI(userMsg) {
 async function startBot() {
   history = [{ role: 'user', parts: [{ text: 'Olá' }] }];
   await callAPI(null);
+}
+
+/* ── HISTORY PERSISTENCE ── */
+async function saveHistory() {
+  if (!userSession) return;
+  await supabaseClient.from('chat_history').upsert({
+    user_id: userSession.user.id,
+    history,
+    step_count: stepCount,
+    done,
+    summary_data: summaryData,
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id' });
+}
+
+async function loadHistory() {
+  const { data } = await supabaseClient
+    .from('chat_history')
+    .select('history, step_count, done, summary_data')
+    .eq('user_id', userSession.user.id)
+    .single();
+
+  if (data && data.history && data.history.length > 1) {
+    history = data.history;
+    stepCount = data.step_count || 0;
+    done = data.done || false;
+    summaryData = data.summary_data || null;
+    restoreChat();
+  } else {
+    startBot();
+  }
+}
+
+function restoreChat() {
+  chat.innerHTML = '';
+  setProgress(stepCount);
+  for (let i = 1; i < history.length; i++) {
+    const msg = history[i];
+    const text = msg.parts[0].text;
+    if (msg.role === 'user') {
+      addBubble(text, 'user');
+    } else {
+      addBubble(mdToHtml(cleanText(text)), 'bot');
+    }
+  }
+  if (done && summaryData) {
+    renderSummary(summaryData);
+    userInput.disabled = true;
+    sendBtn.disabled = true;
+    userInput.placeholder = 'Processo concluído!';
+  } else {
+    userInput.focus();
+  }
 }
 
 async function send() {
