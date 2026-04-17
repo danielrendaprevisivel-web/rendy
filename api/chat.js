@@ -26,41 +26,28 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Payload inválido.' });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada no Vercel.' });
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(500).json({ error: 'GEMINI_API_KEY não configurada no Vercel.' });
   }
 
-  // Converter formato Gemini para Anthropic
-  const systemPrompt = system_instruction?.parts?.[0]?.text || '';
-  const messages = contents.map(msg => ({
-    role: msg.role === 'model' ? 'assistant' : 'user',
-    content: msg.parts?.[0]?.text || ''
-  }));
-
   try {
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: generationConfig?.maxOutputTokens || 1000,
-        system: systemPrompt,
-        messages: messages
-      })
-    });
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ system_instruction, contents, generationConfig })
+      }
+    );
 
-    const anthropicData = await anthropicRes.json();
+    const geminiData = await geminiRes.json();
 
-    if (!anthropicRes.ok) {
-      console.error('Anthropic error:', JSON.stringify(anthropicData));
-      return res.status(502).json({ error: 'Erro na API de IA: ' + JSON.stringify(anthropicData) });
+    if (!geminiRes.ok) {
+      console.error('Gemini error:', JSON.stringify(geminiData));
+      return res.status(502).json({ error: 'Erro na API de IA: ' + JSON.stringify(geminiData) });
     }
 
-    const text = anthropicData.content?.[0]?.text;
+    const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) {
       return res.status(502).json({ error: 'Sem resposta do modelo.' });
     }
