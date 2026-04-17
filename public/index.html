@@ -142,6 +142,32 @@
   .sidebar-pillar { margin-bottom: 1.5rem; }
   .sidebar-pillar-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
   .sidebar-pillar-text { font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.85); }
+  .module-trigger { cursor: pointer; transition: background 0.2s; border-radius: 8px; padding: 0.75rem; margin: 0 -0.75rem; }
+  .module-trigger:hover { background: rgba(255,255,255,0.08); }
+  .module-trigger.active { background: rgba(201,169,110,0.2); border-left: 2px solid var(--gold); }
+  .module-panel { display: none; margin-top: 0.5rem; }
+  .module-panel.show { display: block; }
+  .module-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .module-panel-title { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-weight: 600; color: var(--gold); }
+  .module-panel-edit { font-size: 10px; color: var(--gold); background: transparent; border: 1px solid var(--gold); border-radius: 4px; padding: 3px 8px; cursor: pointer; }
+  .module-panel-content { font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.9); }
+  .module-panel-content.editable { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 0.5rem; min-height: 100px; }
+  .module-field { margin-bottom: 0.75rem; }
+  .module-field-label { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+  .module-field-value { color: #fff; }
+  /* ADMIN */
+  #admin-panel { position:fixed;inset:0;background:var(--navy);z-index:200;padding:2rem;display:none; }
+  #admin-panel.show { display:block; }
+  .admin-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem; }
+  .admin-title { font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold); }
+  .admin-student-list { display:flex;flex-direction:column;gap:0.5rem; }
+  .admin-student-item { background:rgba(255,255,255,0.05);padding:1rem;border-radius:8px;cursor:pointer;transition:background 0.2s; }
+  .admin-student-item:hover { background:rgba(201,169,110,0.2); }
+  .admin-student-email { color:var(--gold);font-weight:500; }
+  .admin-student-meta { font-size:12px;color:rgba(255,255,255,0.6); }
+  .admin-modal { position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:none;align-items:center;justify-content:center; }
+  .admin-modal.show { display:flex; }
+  .admin-modal-content { background:var(--surface);border-radius:12px;padding:2rem;max-width:600px;max-height:80vh;overflow-y:auto; }
 </style>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -165,18 +191,127 @@
 
 <!-- SIDEBAR -->
 <div id="sidebar">
-  <div class="sidebar-pillar">
+  <div class="sidebar-pillar module-trigger" data-module="1">
     <div class="sidebar-pillar-title">Produto Previsível</div>
     <div class="sidebar-pillar-text">Defina seu produto digital no programa RP</div>
   </div>
-  <div class="sidebar-pillar">
+  <div class="sidebar-pillar module-trigger" data-module="2">
     <div class="sidebar-pillar-title">Conteúdo Intencional</div>
     <div class="sidebar-pillar-text">Crie conteúdo que vende enquanto você dorme</div>
   </div>
-  <div class="sidebar-pillar">
+  <div class="sidebar-pillar module-trigger" data-module="3">
     <div class="sidebar-pillar-title">Vendas</div>
-    <div class="sidebar-pillar-text"> monetize sua autoridade e conhecimento</div>
+    <div class="sidebar-pillar-text">Monetize sua autoridade e conhecimento</div>
   </div>
+
+  <!-- Module 1 Panel: Produto Previsível -->
+  <div id="module-1-panel" class="module-panel">
+    <div class="module-panel-header">
+      <span class="module-panel-title">Seu Produto Digital</span>
+      <button class="module-panel-edit" onclick="toggleModuleEdit(1)">Editar</button>
+    </div>
+    <div id="module-1-content" class="module-panel-content">
+    </div>
+  </div>
+
+  <!-- Module 2 Panel: Conteúdo Intencional -->
+  <div id="module-2-panel" class="module-panel">
+    <div class="module-panel-header">
+      <span class="module-panel-title">Conteúdo Intencional</span>
+      <button class="module-panel-edit" onclick="toggleModuleEdit(2)">Editar</button>
+    </div>
+    <div id="module-2-content" class="module-panel-content">
+      <div class="module-field">
+        <div class="module-field-label">Biografia Instagram</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">
+          • Linha 1 (nome/title): [escreva sua biografia]<br>
+          • Linha 2 (especialidade): [seu diferencial]<br>
+          • Linha 3 (CTA): [convite para DM ou link]
+          <!-- TODO: Substituir pela metodologia de conteúdo quando fornecida -->
+        </div>
+      </div>
+      <div class="module-field">
+        <div class="module-field-label">Posts Fixos</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">
+          [Defina 3-5 posts que ficam fixos no seu perfil: capa, destaque, sobre, serviços, depoimentos]
+          <!-- TODO: Substituir pela metodologia de conteúdo quando fornecida -->
+        </div>
+      </div>
+      <div class="module-field">
+        <div class="module-field-label">Roteiro Reels</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">
+          [Escreva seu roteiro padrão para gravar reels: hook → contexto → valor → CTA]
+          <!-- TODO: Substituir pela metodologia de conteúdo quando fornecida -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module 3 Panel: Vendas -->
+  <div id="module-3-panel" class="module-panel">
+    <div class="module-panel-header">
+      <span class="module-panel-title">Vendas</span>
+      <button class="module-panel-edit" onclick="toggleModuleEdit(3)">Editar</button>
+    </div>
+    <div id="module-3-content" class="module-panel-content">
+      <div class="module-field">
+        <div class="module-field-label">Script de Vendas — Passo 1: Abrir</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">[Como iniciar o contato? Ex: "Oi [nome], tudo bem?"]
+          <!-- TODO: Substituir por conteúdo da metodologia 7 passos quando fornecida pela RP -->
+        </div>
+      </div>
+      <div class="module-field">
+        <div class="module-field-label">Script de Vendas — Passo 2: Diagnóstico</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">[Perguntas para entender a situação atual]
+          <!-- TODO: Substituir por conteúdo da metodologia 7 passos quando fornecida pela RP -->
+        </div>
+      </div>
+      <div class="module-field">
+        <div class="module-field-label">Script de Vendas — Passo 3: Problema</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">[Como conectar o problema do cliente com a solução]
+          <!-- TODO: Substituir por conteúdo da metodologia 7 passos quando fornecida pela RP -->
+        </div>
+      </div>
+      <div class="module-field">
+        <div class="module-field-label">Script de Vendas — Passo 4: Solução</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">[Apresentar sua metodologia/produto]
+          <!-- TODO: Substituir por conteúdo da metodologia 7 passos quando fornecida pela RP -->
+        </div>
+      </div>
+      <div class="module-field">
+        <div class="module-field-label">Script de Vendas — Passo 5: Prova</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">[Depoimentos, casos de sucesso, resultados]
+          <!-- TODO: Substituir por conteúdo da metodologia 7 passos quando fornecida pela RP -->
+        </div>
+      </div>
+      <div class="module-field">
+        <div class="module-field-label">Script de Vendas — Passo 6: Oferta</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">[Como apresentar o preço e condições]
+          <!-- TODO: Substituir por conteúdo da metodologia 7 passos quando fornecida pela RP -->
+        </div>
+      </div>
+      <div class="module-field">
+        <div class="module-field-label">Script de Vendas — Passo 7: Fechamento</div>
+        <div class="module-field-value" style="color: rgba(255,255,255,0.5); font-style: italic;">[Como pedir o SIM e próximos passos]
+          <!-- TODO: Substituir por conteúdo da metodologia 7 passos quando fornecida pela RP -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <h1 class="admin-title">Painel Admin — Rendy</h1>
+    <button onclick="logoutAdmin()" style="background:none;border:1px solid var(--gold);color:var(--gold);padding:8px 16px;border-radius:6px;cursor:pointer;">Sair</button>
+  </div>
+  <div id="admin-student-list" class="admin-student-list">
+    <div style="color:rgba(255,255,255,0.5);">Carregando alunos...</div>
+  </div>
+</div>
+
+<div id="admin-modal" onclick="closeAdminModal()">
 </div>
 
 <!-- APP -->
@@ -299,6 +434,9 @@ const STEPS_LABELS = [
 const TOTAL_STEPS = STEPS_LABELS.length;
 
 let history = [], stepCount = 0, done = false, summaryData = null, userSession = null;
+let activeModule = null;
+let moduleEditMode = { 1: false, 2: false, 3: false };
+const MODULE_STORAGE_KEY = 'rendy_module_';
 
 const lockEl = document.getElementById('lock');
 const appEl = document.getElementById('app');
@@ -314,6 +452,87 @@ const progLabel = document.getElementById('progress-label');
 const progPct = document.getElementById('progress-pct');
 const summaryPanel = document.getElementById('summary-panel');
 const sumBody = document.getElementById('sum-body');
+
+/* ── MODULES ── */
+document.querySelectorAll('.module-trigger').forEach(el => {
+  el.addEventListener('click', () => {
+    const moduleNum = el.dataset.module;
+    if (activeModule === moduleNum) {
+      closeModule(moduleNum);
+    } else {
+      openModule(moduleNum);
+    }
+  });
+});
+
+function openModule(num) {
+  if (activeModule && activeModule !== num) closeModule(activeModule);
+  activeModule = num;
+  document.querySelectorAll('.module-trigger').forEach(el => {
+    el.classList.toggle('active', el.dataset.module === num);
+  });
+  const panel = document.getElementById('module-' + num + '-panel');
+  if (panel) panel.classList.add('show');
+}
+
+function closeModule(num) {
+  activeModule = null;
+  document.querySelectorAll('.module-trigger').forEach(el => el.classList.remove('active'));
+  const panel = document.getElementById('module-' + num + '-panel');
+  if (panel) panel.classList.remove('show');
+}
+
+function toggleModuleEdit(num) {
+  moduleEditMode[num] = !moduleEditMode[num];
+  const content = document.getElementById('module-' + num + '-content');
+  const btn = document.querySelector('#module-' + num + '-panel .module-panel-edit');
+  if (moduleEditMode[num]) {
+    content.contentEditable = true;
+    content.classList.add('editable');
+    btn.textContent = 'Salvar';
+  } else {
+    content.contentEditable = false;
+    content.classList.remove('editable');
+    btn.textContent = 'Editar';
+    saveModuleContent(num);
+  }
+}
+
+function saveModuleContent(num) {
+  const content = document.getElementById('module-' + num + '-content');
+  localStorage.setItem(MODULE_STORAGE_KEY + num, content.innerHTML);
+}
+
+function loadModuleContent(num) {
+  const saved = localStorage.getItem(MODULE_STORAGE_KEY + num);
+  if (saved) {
+    const content = document.getElementById('module-' + num + '-content');
+    content.innerHTML = saved;
+  }
+}
+
+function populateModule1(summary) {
+  if (!summary) return;
+  const s = summary;
+  const p = s.publico || {}, pe = s.persona || {}, an = s.analise || {};
+  const content = document.getElementById('module-1-content');
+  content.innerHTML = `
+    <div class="module-field">
+      <div class="module-field-label">Nicho › Subnicho</div>
+      <div class="module-field-value">${s.nicho || '—'} › ${s.subnicho || '—'}</div>
+    </div>
+    <div class="module-field">
+      <div class="module-field-label">Público</div>
+      <div class="module-field-value">${p.localizacao || '—'}, ${p.pais || '—'} · ${p.profissao || '—'} · ${p.renda || '—'}</div>
+    </div>
+    <div class="module-field">
+      <div class="module-field-label">Persona</div>
+      <div class="module-field-value">Sonhos: ${pe.sonhos || '—'}<br>Dores: ${pe.dores || '—'}</div>
+    </div>
+    ${an.validacao ? `<div class="module-field"><div class="module-field-label">Validação</div><div class="module-field-value">${an.validacao}</div></div>` : ''}
+  `;
+  saveModuleContent(1);
+}
 
 /* ── LOGIN ── */
 async function login() {
@@ -490,6 +709,8 @@ function renderSummary(d) {
 
   summaryPanel.classList.add('show');
   summaryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  populateModule1(d);
+  setTimeout(() => openModule('1'), 1500);
 }
 
 /* ── COPY ── */
@@ -662,6 +883,125 @@ userInput.addEventListener('input', () => {
   userInput.style.height = 'auto';
   userInput.style.height = userInput.scrollHeight + 'px';
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  [1,2,3].forEach(loadModuleContent);
+  if (isAdminMode) checkAdminAccess();
+});
+
+/* ── ADMIN ── */
+const isAdminMode = new URLSearchParams(window.location.search).get('admin') === 'true';
+
+async function checkAdminAccess() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    alert('Faça login primeiro');
+    return;
+  }
+  showAdminPanel();
+}
+
+function showAdminPanel() {
+  document.getElementById('admin-panel').classList.add('show');
+  loadAdminStudents();
+}
+
+function logoutAdmin() {
+  window.location.href = '/';
+}
+
+async function loadAdminStudents() {
+  const { data: histories, error } = await supabaseClient
+    .from('chat_history')
+    .select('user_id, summary_data, updated_at')
+    .not('summary_data', 'is', null)
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    document.getElementById('admin-student-list').innerHTML = '<div style="color:#e57373;">Erro ao carregar alunos</div>';
+    return;
+  }
+
+  const userIds = [...new Set(histories.map(h => h.user_id))];
+  const { data: usersData } = await supabaseClient.auth.admin.listUsers();
+  const users = usersData?.users || [];
+
+  const studentList = userIds.map(userId => {
+    const user = users.find(u => u.id === userId);
+    const history = histories.find(h => h.user_id === userId);
+    return {
+      id: userId,
+      email: user?.email || 'Unknown',
+      nicho: history?.summary_data?.nicho || '—',
+      subnicho: history?.summary_data?.subnicho || '—',
+      updatedAt: history?.updated_at
+    };
+  });
+
+  renderStudentList(studentList);
+}
+
+function renderStudentList(students) {
+  const list = document.getElementById('admin-student-list');
+  list.innerHTML = students.map(s => `
+    <div class="admin-student-item" onclick="openStudentDetail('${s.id}')">
+      <div class="admin-student-email">${s.email}</div>
+      <div class="admin-student-meta">${s.nicho} › ${s.subnicho} · ${s.updatedAt ? new Date(s.updatedAt).toLocaleDateString('pt-BR') : '—'}</div>
+    </div>
+  `).join('') || '<div style="color:rgba(255,255,255,0.5);">Nenhum aluno encontrado</div>';
+}
+
+async function openStudentDetail(userId) {
+  const { data: history } = await supabaseClient
+    .from('chat_history')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (!history?.summary_data) return;
+
+  const s = history.summary_data;
+  const p = s.publico || {};
+  const pe = s.persona || {};
+  const an = s.analise || {};
+
+  const modal = document.getElementById('admin-modal');
+  modal.classList.add('show');
+  modal.innerHTML = `
+    <div class="admin-modal-content" onclick="event.stopPropagation()">
+      <div class="admin-header">
+        <h2 class="admin-title" style="color:var(--navy);margin:0;">${s.nicho || '—'} › ${s.subnicho || '—'}</h2>
+        <button onclick="closeAdminModal()" style="background:none;border:none;font-size:24px;cursor:pointer;">×</button>
+      </div>
+      <h3 style="color:var(--navy);margin:1rem 0 0.5rem;font-size:14px;">Público-alvo</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:13px;">
+        <div><strong>Idade:</strong> ${p.idade || '—'}</div>
+        <div><strong>Sexo:</strong> ${p.sexo || '—'}</div>
+        <div><strong>Local:</strong> ${p.localizacao || '—'}</div>
+        <div><strong>País:</strong> ${p.pais || '—'}</div>
+        <div><strong>Profissão:</strong> ${p.profissao || '—'}</div>
+        <div><strong>Renda:</strong> ${p.renda || '—'}</div>
+      </div>
+      <h3 style="color:var(--navy);margin:1rem 0 0.5rem;font-size:14px;">Persona</h3>
+      <div style="font-size:13px;line-height:1.6;">
+        <div><strong>Sonhos:</strong> ${pe.sonhos || '—'}</div>
+        <div><strong>Dores:</strong> ${pe.dores || '—'}</div>
+        <div><strong>Dificuldades:</strong> ${pe.dificuldades || '—'}</div>
+        <div><strong>Crenças:</strong> ${pe.crencas || '—'}</div>
+        <div><strong>Concreto:</strong> ${pe.concreto || '—'}</div>
+      </div>
+      <h3 style="color:var(--navy);margin:1rem 0 0.5rem;font-size:14px;">Biografia Instagram</h3>
+      <div style="font-size:13px;padding:0.5rem;background:var(--bg);border-radius:4px;"><em>Em breve...</em></div>
+      <h3 style="color:var(--navy);margin:1rem 0 0.5rem;font-size:14px;">Script de Vendas</h3>
+      <div style="font-size:13px;padding:0.5rem;background:var(--bg);border-radius:4px;"><em>Em breve...</em></div>
+      ${an.validacao ? `<h3 style="color:var(--navy);margin:1rem 0 0.5rem;font-size:14px;">Análise</h3><div style="font-size:13px;">${an.validacao}</div>` : ''}
+    </div>
+  `;
+}
+
+function closeAdminModal() {
+  document.getElementById('admin-modal').classList.remove('show');
+}
 </script>
 </body>
 </html>
