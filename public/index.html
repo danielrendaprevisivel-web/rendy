@@ -787,6 +787,7 @@ async function callAPI(userMsg, retries = 3) {
       removeTyping();
 
       if (data.error) {
+        console.error('Erro da API:', data.error, 'Status:', res.status, 'Attempt:', attempt);
         if (attempt < retries) {
           await new Promise(r => setTimeout(r, 1000 * attempt));
           continue;
@@ -815,6 +816,7 @@ async function callAPI(userMsg, retries = 3) {
       }
       return;
     } catch(e) {
+      console.error('Erro de rede:', e, 'Attempt:', attempt);
       if (attempt < retries) {
         await new Promise(r => setTimeout(r, 1000 * attempt));
       } else {
