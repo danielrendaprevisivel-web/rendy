@@ -760,7 +760,7 @@ function copySummary() {
 }
 
 /* ── API ── */
-async function callAPI(userMsg) {
+async function callAPI(userMsg, retries = 3) {
   if (userMsg) {
     history.push({ role: 'user', parts: [{ text: userMsg }] });
     stepCount = Math.min(stepCount + 1, TOTAL_STEPS);
@@ -768,42 +768,61 @@ async function callAPI(userMsg) {
   }
   showTyping();
   sendBtn.disabled = true;
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userSession.access_token}`
-      },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: history,
-        generationConfig: { maxOutputTokens: 1000 }
-      })
-    });
-    const data = await res.json();
-    removeTyping();
-    const raw = data.text || data.error || 'Erro ao obter resposta.';
-    const summary = extractSummary(raw);
-    const display = cleanText(raw);
-    history.push({ role: 'model', parts: [{ text: raw }] });
-    saveHistory();
-    addBubble(mdToHtml(display), 'bot');
-    if (summary) {
-      setProgress(TOTAL_STEPS);
-      renderSummary(summary);
-      userInput.disabled = true;
-      sendBtn.disabled = true;
-      userInput.placeholder = 'Processo concluído!';
-      done = true;
-    } else {
-      sendBtn.disabled = false;
-      userInput.focus();
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userSession.access_token}`
+        },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents: history,
+          generationConfig: { maxOutputTokens: 1000 }
+        })
+      });
+      const data = await res.json();
+      removeTyping();
+
+      if (data.error) {
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 1000 * attempt));
+          continue;
+        }
+        addBubble('Tive uma dificuldade técnica, tente novamente.', 'bot');
+        sendBtn.disabled = false;
+        return;
+      }
+
+      const raw = data.text || 'Erro ao obter resposta.';
+      const summary = extractSummary(raw);
+      const display = cleanText(raw);
+      history.push({ role: 'model', parts: [{ text: raw }] });
+      saveHistory();
+      addBubble(mdToHtml(display), 'bot');
+      if (summary) {
+        setProgress(TOTAL_STEPS);
+        renderSummary(summary);
+        userInput.disabled = true;
+        sendBtn.disabled = true;
+        userInput.placeholder = 'Processo concluído!';
+        done = true;
+      } else {
+        sendBtn.disabled = false;
+        userInput.focus();
+      }
+      return;
+    } catch(e) {
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * attempt));
+      } else {
+        removeTyping();
+        addBubble('Tive uma dificuldade técnica, tente novamente.', 'bot');
+        sendBtn.disabled = false;
+      }
     }
-  } catch(e) {
-    removeTyping();
-    addBubble('Erro de conexão. Tente novamente.', 'bot');
-    sendBtn.disabled = false;
   }
 }
 
