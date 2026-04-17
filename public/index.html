@@ -594,7 +594,7 @@ async function startBot() {
 /* ── HISTORY PERSISTENCE ── */
 async function saveHistory() {
   if (!userSession) return;
-  const { error } = await supabaseClient.from('chat_history').upsert({
+  await supabaseClient.from('chat_history').upsert({
     user_id: userSession.user.id,
     history,
     step_count: stepCount,
@@ -602,7 +602,6 @@ async function saveHistory() {
     summary_data: summaryData,
     updated_at: new Date().toISOString()
   }, { onConflict: 'user_id' });
-  if (error) console.error('saveHistory error:', error);
 }
 
 async function loadHistory() {
