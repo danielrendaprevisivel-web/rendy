@@ -56,7 +56,7 @@
   #unlock-btn:active { transform: scale(0.98); }
 
   /* APP LAYOUT — flex column, full height */
-  #app { display: none; flex-direction: column; height: 100vh; max-width: 700px; margin: 0 auto; }
+  #app { display: none; flex-direction: column; height: 100vh; max-width: 700px; margin: 0 auto; margin-left: 250px; max-width: calc(700px - 250px); }
   #app.visible { display: flex; }
 
   /* HEADER */
@@ -137,6 +137,11 @@
   .sum-persona-item { background: var(--bg); border-radius: 8px; padding: 0.75rem 1rem; }
   .sum-persona-label { font-size: 9px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
   .sum-persona-val { font-size: 13px; color: var(--text); line-height: 1.5; }
+/* SIDEBAR */
+  #sidebar { position: fixed; left: 0; top: 0; width: 250px; height: 100vh; background: var(--navy); display: flex; flex-direction: column; padding: 1.5rem; color: #fff; z-index: 50; }
+  .sidebar-pillar { margin-bottom: 1.5rem; }
+  .sidebar-pillar-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+  .sidebar-pillar-text { font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.85); }
 </style>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -155,6 +160,22 @@
     <input id="password-input" class="auth-input" type="password" placeholder="Sua senha" autocomplete="current-password" />
     <div id="auth-error"></div>
     <button id="unlock-btn">Entrar</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sidebar-pillar">
+    <div class="sidebar-pillar-title">Produto Previsível</div>
+    <div class="sidebar-pillar-text">Defina seu produto digital no programa RP</div>
+  </div>
+  <div class="sidebar-pillar">
+    <div class="sidebar-pillar-title">Conteúdo Intencional</div>
+    <div class="sidebar-pillar-text">Crie conteúdo que vende enquanto você dorme</div>
+  </div>
+  <div class="sidebar-pillar">
+    <div class="sidebar-pillar-title">Vendas</div>
+    <div class="sidebar-pillar-text"> monetize sua autoridade e conhecimento</div>
   </div>
 </div>
 
