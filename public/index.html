@@ -109,6 +109,13 @@
   .option-btn.other { border-style: dashed; color: var(--muted); }
   .option-btn.other:hover { color: var(--text); }
   .options-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .age-range-wrap { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .age-range-wrap label { font-size: 13px; color: var(--text); }
+  .age-range-wrap input[type=number] { width: 64px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); text-align: center; }
+  .age-range-wrap input[type=number]:focus { outline: none; border-color: var(--gold); }
+  .age-confirm-btn { padding: 8px 16px; background: var(--gold); color: var(--navy); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.2s; }
+  .age-confirm-btn:hover { opacity: 0.85; }
+  .age-confirm-btn:disabled { opacity: 0.4; cursor: default; }
 
   /* INPUT — fixed at bottom of center column */
   #input-area { padding: 0.875rem 1.25rem; border-top: 1px solid rgba(201,169,110,0.2); background: var(--navy); display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
@@ -407,7 +414,7 @@ Se o aluno escolher "Outro" em qualquer etapa, peça que escreva livremente.
 
 ETAPA 4 — PÚBLICO-ALVO
 Colete em sequência, uma pergunta por vez:
-4a) Faixa de idade do público
+4a) Faixa de idade do público — ao perguntar, termine a mensagem com exatamente: [FAIXA_IDADE]
 4b) Sexo predominante
 4c) Cidade/região ou público nacional
 4d) País
@@ -442,9 +449,20 @@ IMPORTANTE:
 - Nunca deixe "..." literal no JSON`;
 
 const STEPS_LABELS = [
-  'Especialidade','Subnicho',
-  'Público: idade','Público: sexo','Público: localização','Público: país','Público: profissão','Público: renda',
-  'Persona: sonhos','Persona: dores','Persona: dificuldades','Persona: crenças','Persona: pessoa concreta',
+  'Segmento',
+  'Nicho',
+  'Subnicho',
+  'Público: idade',
+  'Público: sexo',
+  'Público: localização',
+  'Público: país',
+  'Público: profissão',
+  'Público: renda',
+  'Persona: sonhos',
+  'Persona: dores',
+  'Persona: dificuldades',
+  'Persona: crenças',
+  'Persona: pessoa concreta',
   'Análise final'
 ];
 const TOTAL_STEPS = STEPS_LABELS.length;
@@ -613,10 +631,15 @@ function addBubble(html, role) {
     div.appendChild(s);
     let textContent = html;
     let opts = null;
+    let hasFaixaIdade = false;
     const opcMatch = html.match(/\[OPCOES\](\[[\s\S]*?\])/);
     if (opcMatch) {
       textContent = html.replace(/\[OPCOES\]\[[\s\S]*?\]/, '').trim();
       try { opts = JSON.parse(opcMatch[1]); } catch(e) {}
+    }
+    if (textContent.includes('[FAIXA_IDADE]')) {
+      textContent = textContent.replace('[FAIXA_IDADE]', '').trim();
+      hasFaixaIdade = true;
     }
     const p = document.createElement('div');
     p.innerHTML = textContent.replace(/\n/g, '<br>');
@@ -632,6 +655,26 @@ function addBubble(html, role) {
         btnContainer.appendChild(btn);
       });
       div.appendChild(btnContainer);
+    }
+    if (hasFaixaIdade) {
+      const wrap = document.createElement('div');
+      wrap.className = 'age-range-wrap';
+      wrap.innerHTML = '<label>De:</label><input type="number" id="age-from" min="1" max="99" placeholder="18"><label>até</label><input type="number" id="age-to" min="1" max="99" placeholder="35"><label>anos</label>';
+      const confirmBtn = document.createElement('button');
+      confirmBtn.className = 'age-confirm-btn';
+      confirmBtn.textContent = 'Confirmar';
+      confirmBtn.onclick = () => {
+        const from = wrap.querySelector('#age-from').value;
+        const to = wrap.querySelector('#age-to').value;
+        if (!from || !to) return;
+        wrap.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
+        confirmBtn.style.opacity = '0.4';
+        const msg = `De ${from} até ${to} anos`;
+        addBubble(msg, 'user');
+        callAPI(msg);
+      };
+      wrap.appendChild(confirmBtn);
+      div.appendChild(wrap);
     }
   } else {
     div.textContent = html;
