@@ -26,28 +26,46 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Payload inválido.' });
   }
 
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY não configurada no Vercel.' });
+  if (!process.env.GROQ_API_KEY) {
+    return res.status(500).json({ error: 'GROQ_API_KEY não configurada no Vercel.' });
+  }
+
+  // Converte formato Gemini para formato OpenAI/Groq
+  const messages = [];
+
+  if (system_instruction?.parts?.[0]?.text) {
+    messages.push({ role: 'system', content: system_instruction.parts[0].text });
+  }
+
+  for (const item of contents) {
+    const role = item.role === 'model' ? 'assistant' : 'user';
+    const content = item.parts?.[0]?.text || '';
+    messages.push({ role, content });
   }
 
   try {
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ system_instruction, contents, generationConfig })
-      }
-    );
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages,
+        max_tokens: generationConfig?.maxOutputTokens || 1000,
+        temperature: 0.7
+      })
+    });
 
-    const geminiData = await geminiRes.json();
+    const groqData = await groqRes.json();
 
-    if (!geminiRes.ok) {
-      console.error('Gemini error:', JSON.stringify(geminiData));
-      return res.status(502).json({ error: 'Erro na API de IA: ' + JSON.stringify(geminiData) });
+    if (!groqRes.ok) {
+      console.error('Groq error:', JSON.stringify(groqData));
+      return res.status(502).json({ error: 'Erro na API de IA: ' + JSON.stringify(groqData) });
     }
 
-    const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = groqData.choices?.[0]?.message?.content;
     if (!text) {
       return res.status(502).json({ error: 'Sem resposta do modelo.' });
     }

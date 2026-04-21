@@ -1,0 +1,27 @@
+O botão "Ver Resultado" não abre o modal. 
+Abre o console do navegador (F12) e verifica se aparece algum erro 
+JavaScript ao clicar no botão. 
+
+Possíveis causas:
+1. O getElementById do modal está com ID errado
+2. O resumo não está sendo salvo na variável antes do botão aparecer
+3. O evento de clique não está sendo registrado corretamente
+
+Adiciona um console.log dentro da função do botão para confirmar 
+que o clique está sendo capturado, e um console.log do conteúdo 
+do resumo para ver se está preenchido. Depois corrige e faz deploy.
+
+O botão não responde a nenhum clique — o evento não está registrado.
+O problema é que o botão provavelmente é criado dinamicamente mas o 
+addEventListener foi adicionado antes dele existir no DOM.
+
+Usa event delegation para resolver: em vez de adicionar o listener 
+direto no botão, adiciona no documento:
+
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'btn-ver-resultado') {
+    abrirModal();
+  }
+});
+
+Isso garante que funciona mesmo com botões criados dinamicamente.

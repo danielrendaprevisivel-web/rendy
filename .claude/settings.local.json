@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:/Users/User/Desktop/rendy\" add public/index.html)",
+      "Bash(git -C \"C:/Users/User/Desktop/rendy\" commit -m \"feat: adjust #app layout for sidebar \\(250px offset\\)\")",
+      "Bash(git *)",
+      "Bash(python3 *)"
+    ]
+  }
+}
